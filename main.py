@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from datetime import datetime
 
 # Tworzenie instancji FastAPI
@@ -14,15 +15,17 @@ def add_log(message: str):
     log = {"timestamp": datetime.now().isoformat(), "message": message}
     logs.append(log)
 
+# Model do walidacji danych przesyłanych w formacie JSON
+class LogEntry(BaseModel):
+    message: str
+
 @app.post("/logs")
-def post_log(message: str):
+def post_log(log_entry: LogEntry):
     """
     Endpoint HTTP do dodawania nowego logu.
     """
-    if not message:
-        raise HTTPException(status_code=400, detail="Message is required")
-    add_log(message)
-    return {"status": "success", "log": {"timestamp": datetime.now().isoformat(), "message": message}}
+    add_log(log_entry.message)
+    return {"status": "success", "log": {"timestamp": datetime.now().isoformat(), "message": log_entry.message}}
 
 @app.get("/logs")
 def get_logs():
@@ -30,3 +33,10 @@ def get_logs():
     Endpoint HTTP do pobierania logów.
     """
     return logs
+
+@app.get("/")
+def root():
+    """
+    Testowy endpoint.
+    """
+    return {"message": "Serwer działa!"}
