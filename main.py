@@ -1,26 +1,27 @@
 from fastapi import FastAPI, WebSocket
 from datetime import datetime
 
-# Tworzymy instancję FastAPI
+# Tworzenie instancji FastAPI
 app = FastAPI()
 
-# Lista logów w pamięci
-logs = []
+# Przykładowe logi
+logs = [
+    {"timestamp": "2024-12-07T10:00:00", "message": "Komputer uruchomiony przez użytkownika Adam"},
+    {"timestamp": "2024-12-07T15:30:00", "message": "Komputer uruchomiony przez użytkownika Kasia"},
+    {"timestamp": "2024-12-08T08:00:00", "message": "Komputer uruchomiony przez użytkownika Piotr"},
+]
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """
-    Endpoint WebSocket do odbierania i przechowywania logów.
+    WebSocket do odbierania logów.
     """
     await websocket.accept()
     try:
         while True:
-            # Odbieramy dane od klienta
             data = await websocket.receive_text()
-            # Tworzymy log z czasem i wiadomością
             log = {"timestamp": datetime.now().isoformat(), "message": data}
             logs.append(log)
-            # Wysyłamy potwierdzenie do klienta
             await websocket.send_text(f"Log zapisany: {data}")
     except Exception as e:
         print(f"Błąd WebSocket: {e}")
@@ -30,13 +31,13 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/logs")
 def get_logs():
     """
-    Endpoint do pobierania logów HTTP.
+    HTTP endpoint do pobierania logów.
     """
     return logs
 
 @app.get("/")
 def root():
     """
-    Prosty endpoint testowy.
+    Testowy endpoint.
     """
     return {"message": "Serwer działa!"}
