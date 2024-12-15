@@ -7,15 +7,15 @@ import asyncio
 # Tworzenie instancji FastAPI
 app = FastAPI()
 
-# Lista logów
-logs = []
+# Zmienna przechowująca tylko jeden najnowszy log
+latest_log = None
 
-def add_log(message: str):
+def set_latest_log(message: str):
     """
-    Funkcja do dodawania logów do listy.
+    Funkcja do ustawiania najnowszego logu.
     """
-    log = {"timestamp": datetime.now().isoformat(), "message": message}
-    logs.append(log)
+    global latest_log
+    latest_log = {"timestamp": datetime.now().isoformat(), "message": message}
 
 # Model do walidacji danych przesyłanych w formacie JSON
 class LogEntry(BaseModel):
@@ -26,15 +26,17 @@ def post_log(log_entry: LogEntry):
     """
     Endpoint HTTP do dodawania nowego logu.
     """
-    add_log(log_entry.message)
+    set_latest_log(log_entry.message)
     return {"status": "success", "log": {"timestamp": datetime.now().isoformat(), "message": log_entry.message}}
 
 @app.get("/logs")
 def get_logs():
     """
-    Endpoint HTTP do pobierania logów.
+    Endpoint HTTP do pobierania najnowszego logu.
     """
-    return logs
+    if latest_log is None:
+        return {"message": "No logs available."}
+    return latest_log
 
 @app.get("/")
 def root():
