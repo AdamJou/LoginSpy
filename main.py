@@ -1,6 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from datetime import datetime
+import requests
+import asyncio
 
 # Tworzenie instancji FastAPI
 app = FastAPI()
@@ -40,3 +42,23 @@ def root():
     Testowy endpoint.
     """
     return {"message": "Serwer działa!"}
+
+async def keep_alive():
+    """
+    Background task to keep the service active by pinging its own URL.
+    """
+    url = "https://loginspy.onrender.com/"  # Replace with your actual Render app URL
+    while True:
+        try:
+            response = requests.get(url)
+            print(f"Keep-alive ping sent. Status code: {response.status_code}")
+        except Exception as e:
+            print(f"Error in keep-alive ping: {e}")
+        await asyncio.sleep(840)  # Ping every 14 minutes (840 seconds)
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    Runs on application startup and triggers the keep-alive task.
+    """
+    asyncio.create_task(keep_alive())
