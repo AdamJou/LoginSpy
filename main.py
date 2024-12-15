@@ -62,5 +62,5 @@ async def startup_event():
     Runs on application startup and triggers the keep-alive task.
     """
     # Usuń tymczasowo keep-alive
-    asyncio.create_task(keep_alive())
+    # asyncio.create_task(keep_alive())
     print("Application startup complete.")
