@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime
 import requests
 import asyncio
-
+from uuid import uuid4
 # Tworzenie instancji FastAPI
 app = FastAPI()
 
