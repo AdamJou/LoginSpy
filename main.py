@@ -11,11 +11,12 @@ app = FastAPI()
 latest_log = None
 
 def set_latest_log(message: str):
-    """
-    Funkcja do ustawiania najnowszego logu.
-    """
     global latest_log
-    latest_log = {"timestamp": datetime.now().isoformat(), "message": message}
+    latest_log = {
+        "id": str(uuid4()),  # Generuje unikalne ID
+        "timestamp": datetime.now().isoformat(),
+        "message": message,
+    }
 
 # Model do walidacji danych przesyłanych w formacie JSON
 class LogEntry(BaseModel):
@@ -31,9 +32,6 @@ def post_log(log_entry: LogEntry):
 
 @app.get("/logs")
 def get_logs():
-    """
-    Endpoint HTTP do pobierania najnowszego logu.
-    """
     if latest_log is None:
         return {"message": "No logs available."}
     return latest_log
